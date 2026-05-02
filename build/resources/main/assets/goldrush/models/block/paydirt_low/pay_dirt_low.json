@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "goldrush:block/paydirt/pay_dirt_low"
-  }
-}
