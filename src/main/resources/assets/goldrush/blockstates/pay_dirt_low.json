@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "layers=1": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height2" },
+    "layers=2": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height4" },
+    "layers=3": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height6" },
+    "layers=4": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height8" },
+    "layers=5": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height10" },
+    "layers=6": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height12" },
+    "layers=7": { "model": "goldrush:block/paydirt_low/pay_dirt_low_height14" },
+    "layers=8": { "model": "goldrush:block/paydirt_low/pay_dirt_low" }
+  }
+}
