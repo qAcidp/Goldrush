@@ -9,6 +9,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.qacidp.goldrush.item.ModItems;
 import net.qacidp.goldrush.block.ModBlocks;
+import net.minecraft.world.item.ItemStack;
+import net.qacidp.goldrush.component.GoldDistributionComponent;
+import net.qacidp.goldrush.component.ModDataComponents;
+import net.qacidp.goldrush.util.PaydirtConfig;
 
 import java.util.function.Supplier;
 
@@ -23,10 +27,13 @@ public class ModCreativeTabs {
                     .title(Component.translatable("itemGroup.goldrush"))
                     .icon(() -> new ItemStack(Items.GOLD_NUGGET))
                     .displayItems((parameters, output) -> {
-
-                        output.accept(ModBlocks.PAY_DIRT_LOW.get());
-                        output.accept(ModItems.TEST_ITEM.get());
-
+                        ItemStack paydirtStack = new ItemStack(ModBlocks.PAY_DIRT_LOW.get());
+                        float totalGold = PaydirtConfig.generateGoldAmount("pay_dirt_low");
+                        float[] goldDistribution = PaydirtConfig.getGoldDistribution("pay_dirt_low", totalGold);
+                        paydirtStack.set(ModDataComponents.GOLD_DISTRIBUTION.get(), new GoldDistributionComponent(goldDistribution));
+                        output.accept(paydirtStack);
+                        output.accept(ModItems.PAYDIRT_SHOVEL.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_EMPTY.get());
 
                     })
                     .build());

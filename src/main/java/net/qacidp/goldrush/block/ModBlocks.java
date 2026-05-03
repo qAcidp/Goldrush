@@ -11,6 +11,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.qacidp.goldrush.item.ModItems;
 import net.qacidp.goldrush.block.paydirt.PaydirtBlock;
+import net.qacidp.goldrush.block.paydirt.PaydirtLayerBlock;
 
 import java.util.function.Supplier;
 
@@ -22,7 +23,21 @@ public class ModBlocks {
     public static final DeferredBlock<Block> PAY_DIRT_LOW = registerBlock("pay_dirt_low",
             () -> new PaydirtBlock(BlockBehaviour.Properties.of()
                     .strength(0.5f)
-                    .sound(SoundType.GRAVEL)));
+                    .sound(SoundType.GRAVEL)
+                    .noOcclusion()));
+
+
+    public static final DeferredBlock<Block> PAYDIRT_LAYER = registerBlock("paydirt_layer",
+            () -> new PaydirtLayerBlock(BlockBehaviour.Properties.of()
+                    .strength(0.5f)
+                    .sound(SoundType.GRAVEL)
+                    .noOcclusion()));
+
+    public static final DeferredBlock<Block> PAYDIRT_BUCKET_EMPTY = registerBlock("paydirt_bucket_empty",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(1.0f)
+                    .sound(SoundType.WOOD)));
+
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

@@ -1,4 +1,7 @@
 {
   "itemGroup.goldrush": "Goldrush",
-  "block.goldrush.pay_dirt_low": "Pay Dirt (Low)"
+  "block.goldrush.pay_dirt_low": "Pay Dirt (Low)",
+  "item.goldrush.paydirt_shovel": "Paydirt Shovel",
+  "block.goldrush.paydirt_layer": "Paydirt Layer",
+  "block.goldrush.paydirt_bucket_empty": "Paydirt Bucket (Empty)"
 }

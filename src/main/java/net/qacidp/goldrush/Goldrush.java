@@ -8,6 +8,7 @@ import net.qacidp.goldrush.item.ModItems;
 import org.slf4j.Logger;
 import net.qacidp.goldrush.block.ModBlocks;
 import net.qacidp.goldrush.block.entity.ModBlockEntities;
+import net.qacidp.goldrush.component.ModDataComponents;
 
 @Mod(Goldrush.MODID)
 public class Goldrush {
@@ -20,6 +21,7 @@ public class Goldrush {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModDataComponents.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
     }
 }
