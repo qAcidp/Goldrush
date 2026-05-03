@@ -10,6 +10,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.qacidp.goldrush.item.ModItems;
+import net.qacidp.goldrush.block.paydirt.PaydirtBlock;
 
 import java.util.function.Supplier;
 
@@ -19,7 +20,7 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
 
     public static final DeferredBlock<Block> PAY_DIRT_LOW = registerBlock("pay_dirt_low",
-            () -> new SnowLayerBlock(BlockBehaviour.Properties.of()
+            () -> new PaydirtBlock(BlockBehaviour.Properties.of()
                     .strength(0.5f)
                     .sound(SoundType.GRAVEL)));
 
