@@ -6,6 +6,9 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.qacidp.goldrush.item.paydirt.PaydirtShovelItem;
+import net.minecraft.world.item.BlockItem;
+import net.qacidp.goldrush.block.ModBlocks;
+
 
 import static net.qacidp.goldrush.Goldrush.MODID;
 
@@ -17,6 +20,7 @@ public class ModItems {
 
     public static final DeferredItem<PaydirtShovelItem> PAYDIRT_SHOVEL =
             ITEMS.register("paydirt_shovel", PaydirtShovelItem::new);
+
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

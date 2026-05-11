@@ -10,7 +10,8 @@ public class PaydirtConfig {
 
     static {
         // Format: registerPaydirt(registryName, minGold, maxGold)
-        registerPaydirt("pay_dirt_low", 0.0f, 0.5f);
+        registerPaydirt("pay_dirt_low", 0.0f, 0.05f);
+        registerPaydirt("pay_dirt_common", 0.05f, 0.1f);
     }
 
     public static void registerPaydirt(String registryName, float minGold, float maxGold) {

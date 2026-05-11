@@ -1,7 +1,22 @@
 {
   "itemGroup.goldrush": "Goldrush",
   "block.goldrush.pay_dirt_low": "Pay Dirt (Low)",
+  "block.goldrush.pay_dirt_common": "Pay Dirt (Common)",
+  "block.goldrush.pay_dirt_low_nugget": "Pay Dirt (Low) - Nugget",
+  "block.goldrush.pay_dirt_common_nugget": "Pay Dirt (Common) - Nugget",
+
   "item.goldrush.paydirt_shovel": "Paydirt Shovel",
+
   "block.goldrush.paydirt_layer": "Paydirt Layer",
-  "block.goldrush.paydirt_bucket_empty": "Paydirt Bucket (Empty)"
+
+  "block.goldrush.paydirt_bucket_block_empty": "Paydirt Bucket (Empty)",
+  "block.goldrush.paydirt_bucket_block_25": "Paydirt Bucket (25%)",
+  "block.goldrush.paydirt_bucket_block_50": "Paydirt Bucket (50%)",
+  "block.goldrush.paydirt_bucket_block_75": "Paydirt Bucket (75%)",
+  "block.goldrush.paydirt_bucket_block_100": "Paydirt Bucket (Full)",
+
+
+  "block.goldrush.washplant_base": "Washplant Base",
+  "block.goldrush.washplant_extension": "Washplant Extension",
+  "block.goldrush.washplant_head": "Washplant Head"
 }

@@ -7,9 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.qacidp.goldrush.item.ModItems;
 import net.qacidp.goldrush.block.ModBlocks;
-import net.minecraft.world.item.ItemStack;
 import net.qacidp.goldrush.component.GoldDistributionComponent;
 import net.qacidp.goldrush.component.ModDataComponents;
 import net.qacidp.goldrush.util.PaydirtConfig;
@@ -32,8 +30,38 @@ public class ModCreativeTabs {
                         float[] goldDistribution = PaydirtConfig.getGoldDistribution("pay_dirt_low", totalGold);
                         paydirtStack.set(ModDataComponents.GOLD_DISTRIBUTION.get(), new GoldDistributionComponent(goldDistribution));
                         output.accept(paydirtStack);
+
+                        ItemStack paydirtNStack = new ItemStack(ModBlocks.PAY_DIRT_LOW_NUGGET.get());
+                        float totalGoldN = PaydirtConfig.generateGoldAmount("pay_dirt_low");
+                        float[] goldDistributionN = PaydirtConfig.getGoldDistribution("pay_dirt_low", totalGoldN);
+                        paydirtNStack.set(ModDataComponents.GOLD_DISTRIBUTION.get(), new GoldDistributionComponent(goldDistributionN));
+                        output.accept(paydirtNStack);
+
+                        ItemStack commonStack = new ItemStack(ModBlocks.PAY_DIRT_COMMON.get());
+                        float totalGoldCommon = PaydirtConfig.generateGoldAmount("pay_dirt_common");
+                        float[] goldDistCommon = PaydirtConfig.getGoldDistribution("pay_dirt_common", totalGoldCommon);
+                        commonStack.set(ModDataComponents.GOLD_DISTRIBUTION.get(), new GoldDistributionComponent(goldDistCommon));
+                        output.accept(commonStack);
+
+                        ItemStack commonNStack = new ItemStack(ModBlocks.PAY_DIRT_COMMON_NUGGET.get());
+                        float totalGoldCommonN = PaydirtConfig.generateGoldAmount("pay_dirt_common");
+                        float[] goldDistCommonN = PaydirtConfig.getGoldDistribution("pay_dirt_common", totalGoldCommonN);
+                        commonNStack.set(ModDataComponents.GOLD_DISTRIBUTION.get(), new GoldDistributionComponent(goldDistCommonN));
+                        output.accept(commonNStack);
+
+
                         output.accept(ModItems.PAYDIRT_SHOVEL.get());
-                        output.accept(ModBlocks.PAYDIRT_BUCKET_EMPTY.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_EMPTY.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_25.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_50.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_75.get());
+                        output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_100.get());
+                        output.accept(ModBlocks.WASHPLANT_BASE.get());
+                        output.accept(ModBlocks.WASHPLANT_EXTENSION.get());
+                        output.accept(ModBlocks.WASHPLANT_HEAD.get());
+
+
+
 
                     })
                     .build());

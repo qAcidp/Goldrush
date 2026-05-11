@@ -33,8 +33,11 @@ public class PaydirtBlock extends BaseEntityBlock {
             box(0, 0, 0, 16, 16, 16)
     };
 
-    public PaydirtBlock(Properties properties) {
+    private final String paydirtType;
+
+    public PaydirtBlock(Properties properties, String paydirtType) {
         super(properties);
+        this.paydirtType = paydirtType;
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYERS, 8));
     }
 
@@ -55,7 +58,7 @@ public class PaydirtBlock extends BaseEntityBlock {
 
     @Override
     public MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(PaydirtBlock::new);
+        return simpleCodec(props -> new PaydirtBlock(props, paydirtType));
     }
 
     @Nullable
@@ -76,8 +79,8 @@ public class PaydirtBlock extends BaseEntityBlock {
         if (!level.isClientSide) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof PaydirtBlockEntity paydirtEntity) {
-                float totalGold = PaydirtConfig.generateGoldAmount("pay_dirt_low");
-                float[] goldDistribution = PaydirtConfig.getGoldDistribution("pay_dirt_low", totalGold);
+                float totalGold = PaydirtConfig.generateGoldAmount(paydirtType);
+                float[] goldDistribution = PaydirtConfig.getGoldDistribution(paydirtType, totalGold);
                 paydirtEntity.setGoldDistribution(goldDistribution);
                 paydirtEntity.setChanged();
             }

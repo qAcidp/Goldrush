@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "goldrush:item/paydirt_bucket_empty_hand"
-  }
-}
-

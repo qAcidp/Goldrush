@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import net.qacidp.goldrush.block.ModBlocks;
 import net.qacidp.goldrush.block.entity.ModBlockEntities;
 import net.qacidp.goldrush.component.ModDataComponents;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.qacidp.goldrush.client.ClientSetup;
+import net.qacidp.goldrush.data.ModAttachments;
 
 @Mod(Goldrush.MODID)
 public class Goldrush {
@@ -22,6 +25,10 @@ public class Goldrush {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        ModAttachments.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
+
+
+        modEventBus.addListener(ClientSetup::registerRenderers);
     }
 }
