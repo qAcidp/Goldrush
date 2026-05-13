@@ -18,5 +18,11 @@
 
   "block.goldrush.washplant_base": "Washplant Base",
   "block.goldrush.washplant_extension": "Washplant Extension",
-  "block.goldrush.washplant_head": "Washplant Head"
+  "block.goldrush.washplant_head": "Washplant Head",
+
+
+  "item.goldrush.washplant_mat": "Miner's Moss",
+  "item.goldrush.washplant_mat_light": "Miner's Moss (Light)",
+  "item.goldrush.washplant_mat_medium": "Miner's Moss (Medium)",
+  "item.goldrush.washplant_mat_heavy": "Miner's Moss (Heavy)"
 }

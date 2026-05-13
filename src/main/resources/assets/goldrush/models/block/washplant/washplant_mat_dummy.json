@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "empty": "goldrush:block/washplant/washplant_mat",
+    "light": "goldrush:block/washplant/washplant_mat_light",
+    "medium": "goldrush:block/washplant/washplant_mat_medium",
+    "heavy": "goldrush:block/washplant/washplant_mat_heavy"
+  }
+}

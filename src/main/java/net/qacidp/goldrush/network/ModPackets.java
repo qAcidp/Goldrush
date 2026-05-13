@@ -33,5 +33,11 @@ public class ModPackets {
                 SyncWashplantBasePacket.STREAM_CODEC,
                 SyncWashplantBasePacket::handle
         );
+
+        registrar.playToClient(
+                SyncWashplantMatPacket.TYPE,
+                SyncWashplantMatPacket.STREAM_CODEC,
+                SyncWashplantMatPacket::handle
+        );
     }
 }

@@ -13,6 +13,16 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.qacidp.goldrush.item.ModItems;
+import net.qacidp.goldrush.item.washplant.WashplantMatItem;
+import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
+import net.qacidp.goldrush.network.SyncWashplantMatPacket;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class WashplantExtensionBlock extends BaseEntityBlock {
 
@@ -82,4 +92,80 @@ public class WashplantExtensionBlock extends BaseEntityBlock {
     public MapCodec<? extends BaseEntityBlock> codec() {
         return simpleCodec(WashplantExtensionBlock::new);
     }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                           Player player, InteractionHand hand, BlockHitResult hitResult) {
+
+        if (!level.isClientSide) {
+            BlockEntity entity = level.getBlockEntity(pos);
+            if (!(entity instanceof WashplantExtensionBlockEntity extEntity)) { // GEÄNDERT!
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            }
+
+            // Matte platzieren
+            if (stack.getItem() instanceof WashplantMatItem matItem) {
+                if (extEntity.hasMat()) { // GEÄNDERT!
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cAlready has a mat!"));
+                    return ItemInteractionResult.FAIL;
+                }
+
+                extEntity.setHasMat(true); // GEÄNDERT!
+                extEntity.setMatWashCycles(matItem.getWashCycles()); // GEÄNDERT!
+
+                PacketDistributor.sendToPlayersTrackingChunk((net.minecraft.server.level.ServerLevel) level,
+                        new net.minecraft.world.level.ChunkPos(pos),
+                        new SyncWashplantMatPacket(pos, true, matItem.getWashCycles(), true));
+
+
+
+
+                if (!player.isCreative()) {
+                    stack.shrink(1);
+                }
+
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aMat placed!"));
+                return ItemInteractionResult.SUCCESS;
+            }
+
+            // Matte entfernen
+            if (stack.isEmpty() && player.isCrouching()) {
+                if (!extEntity.hasMat()) { // GEÄNDERT!
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cNo mat here!"));
+                    return ItemInteractionResult.FAIL;
+                }
+
+                ItemStack matItem = getMatItemForWashCycles(extEntity.getMatWashCycles()); // GEÄNDERT!
+
+                if (!player.getInventory().add(matItem)) {
+                    player.drop(matItem, false);
+                }
+
+                extEntity.removeMat(); // GEÄNDERT!
+
+                PacketDistributor.sendToPlayersTrackingChunk((net.minecraft.server.level.ServerLevel) level,
+                        new net.minecraft.world.level.ChunkPos(pos),
+                        new SyncWashplantMatPacket(pos, false, 0, true));
+
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aMat removed!"));
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    private ItemStack getMatItemForWashCycles(int cycles) {
+        if (cycles == 0) {
+            return new ItemStack(ModItems.WASHPLANT_MAT.get());
+        } else if (cycles < 3) {
+            return new ItemStack(ModItems.WASHPLANT_MAT_LIGHT.get());
+        } else if (cycles < 5) {
+            return new ItemStack(ModItems.WASHPLANT_MAT_MEDIUM.get());
+        } else {
+            return new ItemStack(ModItems.WASHPLANT_MAT_HEAVY.get());
+        }
+    }
+
+
 }

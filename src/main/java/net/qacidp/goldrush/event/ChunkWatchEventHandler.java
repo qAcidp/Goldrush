@@ -1,0 +1,37 @@
+package net.qacidp.goldrush.event;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.level.ChunkWatchEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
+import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
+import net.qacidp.goldrush.network.SyncWashplantMatPacket;
+
+import static net.qacidp.goldrush.Goldrush.MODID;
+
+@EventBusSubscriber(modid = MODID)
+public class ChunkWatchEventHandler {
+
+    @SubscribeEvent
+    public static void onChunkWatch(ChunkWatchEvent.Watch event) {
+        ServerLevel level = event.getLevel();
+        ChunkPos chunkPos = event.getPos();
+        LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
+
+        // Sync alle Matten in diesem Chunk
+        for (BlockEntity be : chunk.getBlockEntities().values()) {
+            if (be instanceof WashplantBaseBlockEntity baseEntity && baseEntity.hasMat()) {
+                PacketDistributor.sendToPlayer(event.getPlayer(),
+                        new SyncWashplantMatPacket(baseEntity.getBlockPos(), true, baseEntity.getMatWashCycles(), false));
+            } else if (be instanceof WashplantExtensionBlockEntity extEntity && extEntity.hasMat()) {
+                PacketDistributor.sendToPlayer(event.getPlayer(),
+                        new SyncWashplantMatPacket(extEntity.getBlockPos(), true, extEntity.getMatWashCycles(), true));
+            }
+        }
+    }
+}

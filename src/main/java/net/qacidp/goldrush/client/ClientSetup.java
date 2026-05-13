@@ -20,6 +20,5 @@ public class ClientSetup {
         event.registerBlockEntityRenderer(ModBlockEntities.WASHPLANT_HEAD_BLOCK_ENTITY.get(), WashplantHeadRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.WASHPLANT_BASE_BLOCK_ENTITY.get(), WashplantBaseRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.WASHPLANT_EXTENSION_BLOCK_ENTITY.get(), WashplantExtensionRenderer::new);
-
     }
 }

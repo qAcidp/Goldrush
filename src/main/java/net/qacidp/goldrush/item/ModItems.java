@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.qacidp.goldrush.item.paydirt.PaydirtShovelItem;
 import net.minecraft.world.item.BlockItem;
 import net.qacidp.goldrush.block.ModBlocks;
+import net.qacidp.goldrush.item.washplant.WashplantMatItem;
 
 
 import static net.qacidp.goldrush.Goldrush.MODID;
@@ -20,6 +21,20 @@ public class ModItems {
 
     public static final DeferredItem<PaydirtShovelItem> PAYDIRT_SHOVEL =
             ITEMS.register("paydirt_shovel", PaydirtShovelItem::new);
+
+    public static final DeferredItem<Item> WASHPLANT_MAT = ITEMS.register("washplant_mat",
+            () -> new WashplantMatItem(new Item.Properties(), 0));
+
+    public static final DeferredItem<Item> WASHPLANT_MAT_LIGHT = ITEMS.register("washplant_mat_light",
+            () -> new WashplantMatItem(new Item.Properties(), 2));
+
+    public static final DeferredItem<Item> WASHPLANT_MAT_MEDIUM = ITEMS.register("washplant_mat_medium",
+            () -> new WashplantMatItem(new Item.Properties(), 4));
+
+    public static final DeferredItem<Item> WASHPLANT_MAT_HEAVY = ITEMS.register("washplant_mat_heavy",
+            () -> new WashplantMatItem(new Item.Properties(), 6));
+
+
 
 
     public static void register(IEventBus modEventBus) {

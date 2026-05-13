@@ -51,6 +51,10 @@ public class ModCreativeTabs {
 
 
                         output.accept(ModItems.PAYDIRT_SHOVEL.get());
+                        output.accept(ModItems.WASHPLANT_MAT);
+                        output.accept(ModItems.WASHPLANT_MAT_LIGHT);
+                        output.accept(ModItems.WASHPLANT_MAT_MEDIUM);
+                        output.accept(ModItems.WASHPLANT_MAT_HEAVY);
                         output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_EMPTY.get());
                         output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_25.get());
                         output.accept(ModBlocks.PAYDIRT_BUCKET_BLOCK_50.get());

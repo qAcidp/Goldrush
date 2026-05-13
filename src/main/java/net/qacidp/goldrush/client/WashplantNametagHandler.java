@@ -28,7 +28,7 @@ public class WashplantNametagHandler {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
-        System.out.println("=== NAMETAG EVENT CALLED ===");
+
 
         PoseStack poseStack = event.getPoseStack();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
@@ -46,7 +46,7 @@ public class WashplantNametagHandler {
 
                 for (BlockEntity be : chunk.getBlockEntities().values()) {
                     if (be instanceof WashplantHeadBlockEntity headBE) {
-                        System.out.println("Found WashplantHead at: " + headBE.getBlockPos());
+
                         renderNametag(headBE, poseStack, buffer, event.getCamera().getPosition());
                     }
                 }
@@ -58,7 +58,7 @@ public class WashplantNametagHandler {
                                       MultiBufferSource.BufferSource buffer, // GEÄNDERT
                                       net.minecraft.world.phys.Vec3 cameraPos) {
 
-        System.out.println("Rendering nametag for: " + be.getBlockPos());
+
 
         int fillPercent = (int) (be.getFillLevel() * 100);
         Component component = Component.literal(fillPercent + "%");

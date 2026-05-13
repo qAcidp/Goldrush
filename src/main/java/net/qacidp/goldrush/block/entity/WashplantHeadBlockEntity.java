@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.level.block.Blocks;
+import net.qacidp.goldrush.network.SyncWashplantMatPacket;
 
 public class WashplantHeadBlockEntity extends BlockEntity {
 
@@ -25,6 +26,9 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private float targetFillLevel = 0f;
     private int washingTicks = 0;
     private static final int TOTAL_WASHING_TICKS = 200; // 10 Sekunden (20 ticks/sec * 10)
+    private float totalMaterialWashed = 0f; // Gesamt-Material seit letztem Cycle-Check
+
+
 
     public WashplantHeadBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WASHPLANT_HEAD_BLOCK_ENTITY.get(), pos, state);
@@ -64,7 +68,6 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         this.washingTicks = 0;
         setChanged();
 
-        // Informiere Base/Extension Blöcke
         if (level != null && !level.isClientSide) {
             notifyWashplantBlocks(true);
         }
@@ -73,37 +76,35 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private void notifyWashplantBlocks(boolean washing) {
         if (level == null || level.isClientSide) return;
 
-        System.out.println("=== SERVER: Notifying blocks, washing=" + washing + " ===");
 
         ServerLevel serverLevel = (ServerLevel) level;
         BlockPos below = worldPosition.below();
-        System.out.println("Head at: " + worldPosition + ", Below at: " + below);
+
 
         for (int i = 0; i < 3; i++) {
             BlockPos basePos = below.north(i);
             BlockEntity entity = level.getBlockEntity(basePos);
-            System.out.println("  [Base " + i + "] Position: " + basePos +
-                    ", Entity: " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
+
 
             if (entity instanceof WashplantBaseBlockEntity baseEntity) {
                 baseEntity.setWashing(washing);
-                System.out.println("    -> Set washing to " + washing + ", now is: " + baseEntity.isWashing());
+
 
                 PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
                         new net.minecraft.world.level.ChunkPos(basePos),
                         new SyncWashplantBasePacket(basePos, washing, false));
-                System.out.println("    -> Packet sent!");
+
             }
         }
 
         for (int i = 3; i < 6; i++) {
             BlockPos extPos = below.north(i);
-            System.out.println("Checking extension at: " + extPos);
+
             BlockEntity entity = level.getBlockEntity(extPos);
-            System.out.println("Extension entity: " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
+
 
             if (entity instanceof WashplantExtensionBlockEntity extEntity) {
-                System.out.println("Setting extension washing!");
+
                 extEntity.setWashing(washing);
 
                 PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
@@ -114,6 +115,10 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, WashplantHeadBlockEntity entity) {
+        if (entity.washingTicks % 20 == 0) { // Alle 20 Ticks = 1 Sekunde
+            System.out.println("TICK: isWashing=" + entity.isWashing + ", ticks=" + entity.washingTicks + "/" + TOTAL_WASHING_TICKS);
+        }
+
         if (!entity.isWashing) return;
 
         entity.washingTicks++;
@@ -129,21 +134,7 @@ public class WashplantHeadBlockEntity extends BlockEntity {
                     new net.minecraft.world.level.ChunkPos(pos),
                     new SyncWashplantFillPacket(pos, entity.fillLevel, entity.isWashing));
 
-            // Partikel am Ende der letzten Extension oder Base spawnen
             spawnWaterParticles((ServerLevel) level, pos);
-        }
-
-        if (entity.washingTicks >= TOTAL_WASHING_TICKS) {
-            entity.fillLevel = entity.targetFillLevel;
-            entity.isWashing = false;
-            entity.washingTicks = 0;
-            entity.notifyWashplantBlocks(false);
-
-            if (!level.isClientSide) {
-                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level,
-                        new net.minecraft.world.level.ChunkPos(pos),
-                        new SyncWashplantFillPacket(pos, entity.fillLevel, entity.isWashing));
-            }
         }
 
         if (!level.isClientSide && entity.washingTicks % 10 == 0 &&
@@ -151,8 +142,115 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             spawnGoldGlitterInRiffles((ServerLevel) level, pos);
         }
 
+        // In tick() - ändere den Aufruf:
+        if (entity.washingTicks >= TOTAL_WASHING_TICKS) {
+            float startFillLevel = entity.targetFillLevel + 0.2f;
+            float actualReduced = startFillLevel - entity.targetFillLevel;
+
+            entity.totalMaterialWashed += actualReduced; // ADDIERE zu Gesamt
+
+            System.out.println("Reduced: " + actualReduced + ", Total washed: " + entity.totalMaterialWashed);
+
+            entity.fillLevel = entity.targetFillLevel;
+            entity.isWashing = false;
+            entity.washingTicks = 0;
+
+            // NUR wenn mindestens 1 voller Head (0.20) gewaschen wurde
+            if (entity.totalMaterialWashed >= 0.20f) {
+                int materialPoints = Math.round(entity.totalMaterialWashed * 500);
+                System.out.println("Adding " + materialPoints + " points, resetting totalMaterialWashed");
+
+                addMaterialPointsToMats(level, pos, materialPoints);
+                entity.totalMaterialWashed = 0f; // RESET nach Punkt-Vergabe
+            }
+
+            entity.notifyWashplantBlocks(false);
+            if (!level.isClientSide) {
+                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level,
+                        new net.minecraft.world.level.ChunkPos(pos),
+                        new SyncWashplantFillPacket(pos, entity.fillLevel, entity.isWashing));
+            }
+        }
+
         entity.setChanged();
     }
+
+
+    private static void addMaterialPointsToMats(Level level, BlockPos headPos, int points) {
+        if (level.isClientSide || points <= 0) return;
+
+        System.out.println("=== ADDING " + points + " POINTS TO MATS ===");
+
+        ServerLevel serverLevel = (ServerLevel) level;
+        BlockPos below = headPos.below();
+
+        int matsFound = 0;
+
+        // Base-Blöcke
+        for (int i = 0; i < 3; i++) {
+            BlockPos basePos = below.north(i);
+            BlockEntity entity = level.getBlockEntity(basePos);
+
+            System.out.println("Checking base " + i + " at " + basePos + ": " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
+
+            if (entity instanceof WashplantBaseBlockEntity baseEntity) {
+                System.out.println("  hasMat: " + baseEntity.hasMat());
+
+                if (baseEntity.hasMat()) {
+                    matsFound++;
+                    int oldPoints = baseEntity.getMatMaterialPoints();
+                    int oldCycles = baseEntity.getMatWashCycles();
+
+                    baseEntity.addMatMaterialPoints(points);
+                    int newPoints = baseEntity.getMatMaterialPoints();
+
+                    int newCycles = Math.min(6, newPoints / 100);
+                    baseEntity.setMatWashCycles(newCycles);
+
+                    System.out.println("  -> Base mat: " + oldPoints + " + " + points + " = " + newPoints + " points");
+                    System.out.println("  -> Cycles: " + oldCycles + " -> " + newCycles);
+
+                    PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
+                            new net.minecraft.world.level.ChunkPos(basePos),
+                            new SyncWashplantMatPacket(basePos, true, newCycles, false));
+                }
+            }
+        }
+
+        // Extension-Blöcke
+        for (int i = 3; i < 6; i++) {
+            BlockPos extPos = below.north(i);
+            BlockEntity entity = level.getBlockEntity(extPos);
+
+            System.out.println("Checking extension " + (i-3) + " at " + extPos + ": " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
+
+            if (entity instanceof WashplantExtensionBlockEntity extEntity) {
+                System.out.println("  hasMat: " + extEntity.hasMat());
+
+                if (extEntity.hasMat()) {
+                    matsFound++;
+                    int oldPoints = extEntity.getMatMaterialPoints();
+                    int oldCycles = extEntity.getMatWashCycles();
+
+                    extEntity.addMatMaterialPoints(points);
+                    int newPoints = extEntity.getMatMaterialPoints();
+
+                    int newCycles = Math.min(6, newPoints / 100);
+                    extEntity.setMatWashCycles(newCycles);
+
+                    System.out.println("  -> Extension mat: " + oldPoints + " + " + points + " = " + newPoints + " points");
+                    System.out.println("  -> Cycles: " + oldCycles + " -> " + newCycles);
+
+                    PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
+                            new net.minecraft.world.level.ChunkPos(extPos),
+                            new SyncWashplantMatPacket(extPos, true, newCycles, true));
+                }
+            }
+        }
+
+        System.out.println("Total mats found: " + matsFound);
+    }
+
 
     private static void spawnWaterParticles(ServerLevel level, BlockPos headPos) {
         BlockPos below = headPos.below();

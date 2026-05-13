@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "goldrush:item/washplant/washplant_mat_medium"
+  }
+}
