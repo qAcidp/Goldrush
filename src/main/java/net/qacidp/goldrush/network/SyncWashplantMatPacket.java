@@ -13,7 +13,7 @@ import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
 
-public record SyncWashplantMatPacket(BlockPos pos, boolean hasMat, int washCycles, boolean isExtension) implements CustomPacketPayload {
+public record SyncWashplantMatPacket(BlockPos pos, boolean hasMat, int washCycles, int materialPoints, boolean isExtension) implements CustomPacketPayload {
 
     public static final Type<SyncWashplantMatPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(MODID, "sync_washplant_mat"));
@@ -26,6 +26,8 @@ public record SyncWashplantMatPacket(BlockPos pos, boolean hasMat, int washCycle
                     SyncWashplantMatPacket::hasMat,
                     ByteBufCodecs.INT,
                     SyncWashplantMatPacket::washCycles,
+                    ByteBufCodecs.INT,
+                    SyncWashplantMatPacket::materialPoints,
                     ByteBufCodecs.BOOL,
                     SyncWashplantMatPacket::isExtension,
                     SyncWashplantMatPacket::new
@@ -44,9 +46,11 @@ public record SyncWashplantMatPacket(BlockPos pos, boolean hasMat, int washCycle
                 if (packet.isExtension() && entity instanceof WashplantExtensionBlockEntity extEntity) {
                     extEntity.setHasMat(packet.hasMat());
                     extEntity.setMatWashCycles(packet.washCycles());
+                    extEntity.setMatMaterialPoints(packet.materialPoints());
                 } else if (!packet.isExtension() && entity instanceof WashplantBaseBlockEntity baseEntity) {
                     baseEntity.setHasMat(packet.hasMat());
                     baseEntity.setMatWashCycles(packet.washCycles());
+                    baseEntity.setMatMaterialPoints(packet.materialPoints());
                 }
             }
         });

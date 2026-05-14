@@ -14,6 +14,8 @@ import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 import org.joml.Matrix4f;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 
 public class WashplantExtensionRenderer implements BlockEntityRenderer<WashplantExtensionBlockEntity> {
 
@@ -21,15 +23,22 @@ public class WashplantExtensionRenderer implements BlockEntityRenderer<Washplant
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_flow");
 
     public WashplantExtensionRenderer(BlockEntityRendererProvider.Context ctx) {
+        this.font = ctx.getFont();
     }
+
+    private final Font font;
 
     @Override
     public void render(WashplantExtensionBlockEntity be, float partialTicks, PoseStack poseStack,
                        MultiBufferSource buffer, int light, int overlay) {
 
+
+
+
         // 1. Matte rendern
         if (be.hasMat()) {
             renderMat(be, poseStack, buffer, light);
+
         }
 
         // 2. Wasser rendern
@@ -140,4 +149,14 @@ public class WashplantExtensionRenderer implements BlockEntityRenderer<Washplant
             return ResourceLocation.fromNamespaceAndPath(MODID, "block/washplant/washplant_mat_placed_heavy");
         }
     }
+
+
+
+    private int getColorForMatPoints(int percent) {
+        if (percent >= 75) return 0xFFFF5555;
+        else if (percent >= 50) return 0xFFFFAA00;
+        else if (percent >= 25) return 0xFFFFFF55;
+        else return 0xFF55FF55;
+    }
+
 }

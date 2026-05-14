@@ -34,9 +34,8 @@ public class WashplantExtensionBlockEntity extends BlockEntity {
     public void setHasMat(boolean has) {
         this.hasMat = has;
         setChanged();
-
-        // WICHTIG: Erzwinge Block-Update
-        if (level != null && !level.isClientSide) {
+        // Für beide Seiten
+        if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }

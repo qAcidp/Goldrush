@@ -12,6 +12,8 @@ import net.qacidp.goldrush.component.ModDataComponents;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.qacidp.goldrush.client.ClientSetup;
 import net.qacidp.goldrush.data.ModAttachments;
+import net.neoforged.neoforge.common.NeoForge;
+import net.qacidp.goldrush.client.WashplantNametagHandler;
 
 @Mod(Goldrush.MODID)
 public class Goldrush {
@@ -30,5 +32,7 @@ public class Goldrush {
 
 
         modEventBus.addListener(ClientSetup::registerRenderers);
+
+        NeoForge.EVENT_BUS.register(WashplantNametagHandler.class);
     }
 }

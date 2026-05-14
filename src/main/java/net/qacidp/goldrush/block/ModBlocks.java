@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.qacidp.goldrush.block.bucket.PaydirtWaterBucketBlock;
 import net.qacidp.goldrush.item.ModItems;
 import net.qacidp.goldrush.block.paydirt.PaydirtBlock;
 import net.qacidp.goldrush.block.paydirt.PaydirtLayerBlock;
@@ -23,6 +24,7 @@ import net.qacidp.goldrush.block.washplant.WashplantHeadBlock;
 import java.util.function.Supplier;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
+import net.qacidp.goldrush.item.bucket.PaydirtWaterBucketBlockItem;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -88,6 +90,22 @@ public class ModBlocks {
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
+    //Gold Eimer
+
+    public static final DeferredBlock<Block> PAYDIRT_WATER_BUCKET_BLOCK =
+            registerBlockWithCustomItem("paydirt_water_bucket_block",
+                    () -> new PaydirtWaterBucketBlock(BlockBehaviour.Properties.of()
+                            .strength(1.0f).sound(SoundType.WOOD).noOcclusion()));
+
+    public static final DeferredBlock<Block> PAYDIRT_WATER_BUCKET_BLOCK_HALF =
+            registerBlockWithCustomItem("paydirt_water_bucket_block_half",
+                    () -> new PaydirtWaterBucketBlock(BlockBehaviour.Properties.of()
+                            .strength(1.0f).sound(SoundType.WOOD).noOcclusion()));
+
+    public static final DeferredBlock<Block> PAYDIRT_WATER_BUCKET_BLOCK_FULL =
+            registerBlockWithCustomItem("paydirt_water_bucket_block_full",
+                    () -> new PaydirtWaterBucketBlock(BlockBehaviour.Properties.of()
+                            .strength(1.0f).sound(SoundType.WOOD).noOcclusion()));
 
 
     //Washplant
@@ -121,6 +139,12 @@ public class ModBlocks {
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static <T extends Block> DeferredBlock<T> registerBlockWithCustomItem(String name, Supplier<T> block) {
+        DeferredBlock<T> toReturn = BLOCKS.register(name, block);
+        ModItems.ITEMS.register(name, () -> new PaydirtWaterBucketBlockItem(toReturn.get(), new Item.Properties()));
+        return toReturn;
     }
 
     public static void register(IEventBus modEventBus) {

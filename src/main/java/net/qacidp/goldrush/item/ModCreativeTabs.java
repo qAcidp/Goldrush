@@ -63,6 +63,9 @@ public class ModCreativeTabs {
                         output.accept(ModBlocks.WASHPLANT_BASE.get());
                         output.accept(ModBlocks.WASHPLANT_EXTENSION.get());
                         output.accept(ModBlocks.WASHPLANT_HEAD.get());
+                        output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK);
+                        output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_HALF);
+                        output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_FULL);
 
 
 

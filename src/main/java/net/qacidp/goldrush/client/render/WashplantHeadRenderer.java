@@ -41,18 +41,20 @@ public class WashplantHeadRenderer implements BlockEntityRenderer<WashplantHeadB
         float fillLevel = be.getFillLevel();
         boolean isWashing = be.isWashing();
 
-        // 1. Material rendern
         if (fillLevel > 0) {
             renderMaterial(be, poseStack, buffer, light, fillLevel);
         }
 
-        // 2. Wasser-Layer rendern
         if (isWashing) {
             renderWater(poseStack, buffer, light);
         }
 
 
     }
+
+
+
+
 
     private void renderMaterial(WashplantHeadBlockEntity be, PoseStack poseStack,
                                 MultiBufferSource buffer, int light, float fillLevel) {

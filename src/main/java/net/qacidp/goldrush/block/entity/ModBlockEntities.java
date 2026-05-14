@@ -49,6 +49,14 @@ public class ModBlockEntities {
                             ModBlocks.WASHPLANT_EXTENSION.get()
                     ).build(null));
 
+    public static final Supplier<BlockEntityType<PaydirtWaterBucketBlockEntity>>
+            PAYDIRT_WATER_BUCKET_BLOCK_ENTITY = BLOCK_ENTITIES.register(
+            "paydirt_water_bucket_block_entity",
+            () -> BlockEntityType.Builder.of(PaydirtWaterBucketBlockEntity::new,
+                    ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK.get(),
+                    ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_HALF.get(),
+                    ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_FULL.get()).build(null));
+
 
     public static final Supplier<BlockEntityType<BucketBlockEntity>> BUCKET_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("bucket_block_entity",

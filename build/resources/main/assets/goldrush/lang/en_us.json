@@ -14,6 +14,9 @@
   "block.goldrush.paydirt_bucket_block_50": "Paydirt Bucket (50%)",
   "block.goldrush.paydirt_bucket_block_75": "Paydirt Bucket (75%)",
   "block.goldrush.paydirt_bucket_block_100": "Paydirt Bucket (Full)",
+  "block.goldrush.paydirt_water_bucket_block": "Paydirt Bucket (Water)",
+  "block.goldrush.paydirt_water_bucket_block_half": "Paydirt Bucket (Water, Half)",
+  "block.goldrush.paydirt_water_bucket_block_full": "Paydirt Bucket (Water, Full)",
 
 
   "block.goldrush.washplant_base": "Washplant Base",

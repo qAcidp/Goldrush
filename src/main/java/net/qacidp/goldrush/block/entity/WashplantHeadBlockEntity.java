@@ -13,8 +13,6 @@ import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.qacidp.goldrush.network.SyncWashplantBasePacket;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.level.block.Blocks;
 import net.qacidp.goldrush.network.SyncWashplantMatPacket;
@@ -24,11 +22,10 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private float fillLevel = 0f;
     private boolean isWashing = false;
     private float targetFillLevel = 0f;
+    private float startFillLevel = 0f;
     private int washingTicks = 0;
-    private static final int TOTAL_WASHING_TICKS = 200; // 10 Sekunden (20 ticks/sec * 10)
-    private float totalMaterialWashed = 0f; // Gesamt-Material seit letztem Cycle-Check
-
-
+    private static final int TOTAL_WASHING_TICKS = 200;
+    private float totalMaterialWashed = 0f;
 
     public WashplantHeadBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WASHPLANT_HEAD_BLOCK_ENTITY.get(), pos, state);
@@ -64,6 +61,7 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         if (fillLevel <= 0) return;
 
         this.isWashing = true;
+        this.startFillLevel = this.fillLevel;
         this.targetFillLevel = Math.max(0, fillLevel - amountToReduce);
         this.washingTicks = 0;
         setChanged();
@@ -76,35 +74,27 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private void notifyWashplantBlocks(boolean washing) {
         if (level == null || level.isClientSide) return;
 
-
         ServerLevel serverLevel = (ServerLevel) level;
         BlockPos below = worldPosition.below();
-
 
         for (int i = 0; i < 3; i++) {
             BlockPos basePos = below.north(i);
             BlockEntity entity = level.getBlockEntity(basePos);
 
-
             if (entity instanceof WashplantBaseBlockEntity baseEntity) {
                 baseEntity.setWashing(washing);
-
 
                 PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
                         new net.minecraft.world.level.ChunkPos(basePos),
                         new SyncWashplantBasePacket(basePos, washing, false));
-
             }
         }
 
         for (int i = 3; i < 6; i++) {
             BlockPos extPos = below.north(i);
-
             BlockEntity entity = level.getBlockEntity(extPos);
 
-
             if (entity instanceof WashplantExtensionBlockEntity extEntity) {
-
                 extEntity.setWashing(washing);
 
                 PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
@@ -115,18 +105,12 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, WashplantHeadBlockEntity entity) {
-        if (entity.washingTicks % 20 == 0) { // Alle 20 Ticks = 1 Sekunde
-            System.out.println("TICK: isWashing=" + entity.isWashing + ", ticks=" + entity.washingTicks + "/" + TOTAL_WASHING_TICKS);
-        }
-
         if (!entity.isWashing) return;
 
         entity.washingTicks++;
 
         float progress = Math.min(1.0f, (float) entity.washingTicks / TOTAL_WASHING_TICKS);
-        float startLevel = entity.targetFillLevel + 0.2f;
-        float newLevel = startLevel - (startLevel - entity.targetFillLevel) * progress;
-
+        float newLevel = entity.startFillLevel - (entity.startFillLevel - entity.targetFillLevel) * progress;
         entity.fillLevel = newLevel;
 
         if (!level.isClientSide && entity.washingTicks % 5 == 0) {
@@ -142,12 +126,9 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             spawnGoldGlitterInRiffles((ServerLevel) level, pos);
         }
 
-        // In tick() - ändere den Aufruf:
         if (entity.washingTicks >= TOTAL_WASHING_TICKS) {
-            float startFillLevel = entity.targetFillLevel + 0.2f;
-            float actualReduced = startFillLevel - entity.targetFillLevel;
-
-            entity.totalMaterialWashed += actualReduced; // ADDIERE zu Gesamt
+            float actualReduced = entity.startFillLevel - entity.targetFillLevel;
+            entity.totalMaterialWashed += actualReduced;
 
             System.out.println("Reduced: " + actualReduced + ", Total washed: " + entity.totalMaterialWashed);
 
@@ -155,13 +136,12 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             entity.isWashing = false;
             entity.washingTicks = 0;
 
-            // NUR wenn mindestens 1 voller Head (0.20) gewaschen wurde
-            if (entity.totalMaterialWashed >= 0.20f) {
-                int materialPoints = Math.round(entity.totalMaterialWashed * 500);
+            if (entity.totalMaterialWashed >= 0.18f) {
+                int materialPoints = Math.round(entity.totalMaterialWashed * 100);
                 System.out.println("Adding " + materialPoints + " points, resetting totalMaterialWashed");
 
                 addMaterialPointsToMats(level, pos, materialPoints);
-                entity.totalMaterialWashed = 0f; // RESET nach Punkt-Vergabe
+                entity.totalMaterialWashed = 0f;
             }
 
             entity.notifyWashplantBlocks(false);
@@ -175,7 +155,6 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         entity.setChanged();
     }
 
-
     private static void addMaterialPointsToMats(Level level, BlockPos headPos, int points) {
         if (level.isClientSide || points <= 0) return;
 
@@ -186,7 +165,6 @@ public class WashplantHeadBlockEntity extends BlockEntity {
 
         int matsFound = 0;
 
-        // Base-Blöcke
         for (int i = 0; i < 3; i++) {
             BlockPos basePos = below.north(i);
             BlockEntity entity = level.getBlockEntity(basePos);
@@ -212,12 +190,11 @@ public class WashplantHeadBlockEntity extends BlockEntity {
 
                     PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
                             new net.minecraft.world.level.ChunkPos(basePos),
-                            new SyncWashplantMatPacket(basePos, true, newCycles, false));
+                            new SyncWashplantMatPacket(basePos, true, newCycles, newPoints, false));
                 }
             }
         }
 
-        // Extension-Blöcke
         for (int i = 3; i < 6; i++) {
             BlockPos extPos = below.north(i);
             BlockEntity entity = level.getBlockEntity(extPos);
@@ -243,7 +220,7 @@ public class WashplantHeadBlockEntity extends BlockEntity {
 
                     PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
                             new net.minecraft.world.level.ChunkPos(extPos),
-                            new SyncWashplantMatPacket(extPos, true, newCycles, true));
+                            new SyncWashplantMatPacket(extPos, true, newCycles, newPoints, true));
                 }
             }
         }
@@ -251,11 +228,9 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         System.out.println("Total mats found: " + matsFound);
     }
 
-
     private static void spawnWaterParticles(ServerLevel level, BlockPos headPos) {
         BlockPos below = headPos.below();
 
-        // === NORD-SEITE (Ende der Rinne) ===
         BlockPos lastBlockPos = below.north(2);
 
         for (int i = 3; i < 6; i++) {
@@ -267,7 +242,6 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             }
         }
 
-        // Partikel Nord-Ende
         double xNord = lastBlockPos.getX() + 0.3 + level.random.nextDouble() * 0.4;
         double yNord = lastBlockPos.getY() + 7.0 / 16.0;
         double zNord = lastBlockPos.getZ() - 0.1;
@@ -284,12 +258,11 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             );
         }
 
-        // === SÜD-SEITE (unter dem Head, erster Base-Block) ===
-        BlockPos firstBlockPos = below; // Der erste Base-Block direkt unter dem Head
+        BlockPos firstBlockPos = below;
 
         double xSued = firstBlockPos.getX() + 0.3 + level.random.nextDouble() * 0.4;
         double ySued = firstBlockPos.getY() + 7.0 / 16.0;
-        double zSued = firstBlockPos.getZ() + 1.1; // Leicht außerhalb Süd-Seite
+        double zSued = firstBlockPos.getZ() + 1.1;
 
         for (int i = 0; i < 3; i++) {
             level.sendParticles(
@@ -304,11 +277,9 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         }
     }
 
-
     private static void spawnGoldGlitterInRiffles(ServerLevel level, BlockPos headPos) {
         BlockPos below = headPos.below();
 
-        // Spawn in allen Base/Extension Blöcken
         for (int i = 0; i < 6; i++) {
             BlockPos blockPos = below.north(i);
             BlockEntity entity = level.getBlockEntity(blockPos);
@@ -316,13 +287,12 @@ public class WashplantHeadBlockEntity extends BlockEntity {
             if (entity instanceof WashplantBaseBlockEntity ||
                     entity instanceof WashplantExtensionBlockEntity) {
 
-                // Random Position in der Rinne
                 double x = blockPos.getX() + 0.2 + level.random.nextDouble() * 0.6;
-                double y = blockPos.getY() + 7.0 / 16.0 + 0.1; // Leicht über Wasser
+                double y = blockPos.getY() + 7.0 / 16.0 + 0.1;
                 double z = blockPos.getZ() + level.random.nextDouble();
 
                 level.sendParticles(
-                        ParticleTypes.WAX_ON, // Goldener Glitzer
+                        ParticleTypes.WAX_ON,
                         x, y, z,
                         1,
                         0, 0, 0,
@@ -332,15 +302,15 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         }
     }
 
-
-
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         tag.putFloat("fillLevel", fillLevel);
         tag.putBoolean("isWashing", isWashing);
         tag.putFloat("targetFillLevel", targetFillLevel);
+        tag.putFloat("startFillLevel", startFillLevel);
         tag.putInt("washingTicks", washingTicks);
+        tag.putFloat("totalMaterialWashed", totalMaterialWashed);
     }
 
     @Override
@@ -349,7 +319,18 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         fillLevel = tag.getFloat("fillLevel");
         isWashing = tag.getBoolean("isWashing");
         targetFillLevel = tag.getFloat("targetFillLevel");
+        startFillLevel = tag.getFloat("startFillLevel");
         washingTicks = tag.getInt("washingTicks");
+        totalMaterialWashed = tag.getFloat("totalMaterialWashed");
+    }
+
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putFloat("fillLevel", fillLevel);
+        tag.putBoolean("isWashing", isWashing);
+        return tag;
     }
 
 }

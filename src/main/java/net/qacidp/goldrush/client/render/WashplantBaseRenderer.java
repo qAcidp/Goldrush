@@ -14,6 +14,8 @@ import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
 import org.joml.Matrix4f;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 
 public class WashplantBaseRenderer implements BlockEntityRenderer<WashplantBaseBlockEntity> {
 
@@ -21,16 +23,24 @@ public class WashplantBaseRenderer implements BlockEntityRenderer<WashplantBaseB
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_flow");
 
     public WashplantBaseRenderer(BlockEntityRendererProvider.Context ctx) {
+        this.font = ctx.getFont();
     }
+
+    private final Font font;
+
+
 
     @Override
     public void render(WashplantBaseBlockEntity be, float partialTicks, PoseStack poseStack,
                        MultiBufferSource buffer, int light, int overlay) {
 
+
+
         // 1. Matte rendern
         if (be.hasMat()) {
 
             renderMat(be, poseStack, buffer, light);
+
         }
 
         // 2. Wasser rendern
@@ -56,6 +66,7 @@ public class WashplantBaseRenderer implements BlockEntityRenderer<WashplantBaseB
 
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.cutout());
         Matrix4f matrix = poseStack.last().pose();
+
 
         float matY = 15f / 16f;
         float x1 = 3f / 16f;
@@ -147,4 +158,15 @@ public class WashplantBaseRenderer implements BlockEntityRenderer<WashplantBaseB
             return ResourceLocation.fromNamespaceAndPath(MODID, "block/washplant/washplant_mat_placed_heavy");
         }
     }
+
+
+
+
+    private int getColorForMatPoints(int percent) {
+        if (percent >= 75) return 0xFFFF5555;
+        else if (percent >= 50) return 0xFFFFAA00;
+        else if (percent >= 25) return 0xFFFFFF55;
+        else return 0xFF55FF55;
+    }
+
 }

@@ -37,6 +37,24 @@ public class GoldCommands {
                                     return 0;
                                 })
                         )
+                        .then(Commands.literal("givemat")
+                                .executes(context -> {
+                                    if (context.getSource().getEntity() instanceof ServerPlayer player) {
+                                        net.minecraft.world.item.ItemStack mat = new net.minecraft.world.item.ItemStack(
+                                                net.qacidp.goldrush.item.ModItems.WASHPLANT_MAT_HEAVY.get());
+                                        net.qacidp.goldrush.item.washplant.WashplantMatItem.setMaterialPoints(mat, 400);
+
+                                        if (!player.getInventory().add(mat)) {
+                                            player.drop(mat, false);
+                                        }
+
+                                        player.sendSystemMessage(Component.literal("§aGiven Heavy Mat with 400 points"));
+                                        return 1;
+                                    }
+                                    return 0;
+                                })
+                        )
+
         );
     }
 }

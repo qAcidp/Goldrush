@@ -101,11 +101,12 @@ public class WashplantBaseBlock extends BaseEntityBlock {
 
                 baseEntity.setHasMat(true);
                 baseEntity.setMatWashCycles(matItem.getWashCycles());
+                baseEntity.setMatMaterialPoints(WashplantMatItem.getMaterialPoints(stack)); // Punkte laden
 
                 PacketDistributor.sendToPlayersTrackingChunk((net.minecraft.server.level.ServerLevel) level,
                         new net.minecraft.world.level.ChunkPos(pos),
-                        new SyncWashplantMatPacket(pos, true, matItem.getWashCycles(), false));
-
+                        new SyncWashplantMatPacket(pos, true, matItem.getWashCycles(),
+                                baseEntity.getMatMaterialPoints(), false)); // getMatMaterialPoints() statt 0
 
                 if (!player.isCreative()) {
                     stack.shrink(1);
@@ -124,6 +125,8 @@ public class WashplantBaseBlock extends BaseEntityBlock {
 
                 // Gib das richtige Item basierend auf Waschgängen zurück
                 ItemStack matItem = getMatItemForWashCycles(baseEntity.getMatWashCycles());
+                WashplantMatItem.setMaterialPoints(matItem, baseEntity.getMatMaterialPoints()); // Punkte speichern
+
 
                 if (!player.getInventory().add(matItem)) {
                     player.drop(matItem, false);
@@ -132,7 +135,7 @@ public class WashplantBaseBlock extends BaseEntityBlock {
                 baseEntity.removeMat();
                 PacketDistributor.sendToPlayersTrackingChunk((net.minecraft.server.level.ServerLevel) level,
                         new net.minecraft.world.level.ChunkPos(pos),
-                        new SyncWashplantMatPacket(pos, false, 0, false));
+                        new SyncWashplantMatPacket(pos, false, 0, 0, false));
 
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aMat removed!"));
                 return ItemInteractionResult.SUCCESS;
