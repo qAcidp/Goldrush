@@ -10,6 +10,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public class PaydirtWaterBucketBlockEntity extends BlockEntity {
 
     private int goldPoints = 0; // 0-1200
+    private float goldGrams = 0f;
+
+    public float getGoldGrams() { return goldGrams; }
 
     public PaydirtWaterBucketBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PAYDIRT_WATER_BUCKET_BLOCK_ENTITY.get(), pos, state);
@@ -24,12 +27,18 @@ public class PaydirtWaterBucketBlockEntity extends BlockEntity {
         setChanged();
     }
 
+    public void addGoldGrams(float grams) {
+        this.goldGrams += grams;
+        setChanged();
+    }
+
 
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         tag.putInt("goldPoints", goldPoints);
+        tag.putFloat("goldGrams", goldGrams);
     }
 
 
@@ -38,5 +47,6 @@ public class PaydirtWaterBucketBlockEntity extends BlockEntity {
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         goldPoints = tag.getInt("goldPoints");
+        goldGrams = tag.getFloat("goldGrams");
     }
 }

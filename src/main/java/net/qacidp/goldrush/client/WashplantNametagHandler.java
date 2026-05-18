@@ -13,6 +13,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantHeadBlockEntity;
+import net.qacidp.goldrush.block.entity.WavetableBlockEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -52,6 +53,10 @@ public class WashplantNametagHandler {
                         percent = Math.min(100, base.getMatMaterialPoints() / 6);
                     } else if (be instanceof WashplantExtensionBlockEntity ext && ext.hasMat()) {
                         percent = Math.min(100, ext.getMatMaterialPoints() / 6);
+                    } else if (be instanceof WavetableBlockEntity wavetable && wavetable.isProcessing()) {
+                        // 100→0 statt 0→100
+                        int pct = 100 - (int)((float) wavetable.getProcessingTicks() / 200f * 100f);
+                        percent = pct;
                     }
 
                     if (percent < 0) continue;

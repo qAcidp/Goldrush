@@ -24,6 +24,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.qacidp.goldrush.block.ModBlocks;
 import net.qacidp.goldrush.block.entity.ModBlockEntities;
 import net.qacidp.goldrush.block.entity.WashplantHeadBlockEntity;
+import net.qacidp.goldrush.component.GoldDistributionComponent;
+import net.qacidp.goldrush.component.ModDataComponents;
 import net.qacidp.goldrush.network.SyncWashplantFillPacket;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,6 +132,17 @@ public class WashplantHeadBlock extends BaseEntityBlock {
                     return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
 
+// Gold aus dem Eimer-Item auslesen
+                float bucketGold = 0f;
+                GoldDistributionComponent goldComp = stack.get(ModDataComponents.GOLD_DISTRIBUTION.get());
+                System.out.println("[HEAD_READ] goldComp null: " + (goldComp == null) +
+                        ", hasComp: " + stack.has(ModDataComponents.GOLD_DISTRIBUTION.get()));
+                if (goldComp != null && goldComp.getGoldDistribution().length > 0) {
+                    bucketGold = goldComp.getGoldDistribution()[0];
+                    System.out.println("[HEAD_READ] bucketGold: " + bucketGold);
+                }
+
+// Anteilig falls nicht alles in den Head passt
                 float currentFill = headEntity.getFillLevel();
                 float spaceLeft = 1.0f - currentFill;
 
@@ -140,8 +153,12 @@ public class WashplantHeadBlock extends BaseEntityBlock {
 
                 float amountToAdd = Math.min(bucketFill, spaceLeft);
                 float bucketRemaining = bucketFill - amountToAdd;
+                float ratio = bucketFill > 0 ? amountToAdd / bucketFill : 0f;
+                float goldToAdd = bucketGold * ratio;
 
                 headEntity.addFillLevel(amountToAdd);
+                headEntity.addGoldToHead(goldToAdd);
+                System.out.println("[HEAD] Gold zum Head: +" + goldToAdd + "g, total: " + headEntity.getTotalGoldInHead() + "g");
 
                 PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level,
                         new net.minecraft.world.level.ChunkPos(pos),
@@ -205,6 +222,8 @@ public class WashplantHeadBlock extends BaseEntityBlock {
             return new ItemStack(ModBlocks.PAYDIRT_BUCKET_BLOCK_100.get());
         }
     }
+
+
 
     @Nullable
     @Override

@@ -35,23 +35,21 @@ public record SyncWashplantBasePacket(BlockPos pos, boolean isWashing, boolean i
     }
 
     public static void handle(SyncWashplantBasePacket packet, IPayloadContext context) {
-        System.out.println("=== CLIENT: Received packet for pos=" + packet.pos() +
-                ", washing=" + packet.isWashing() +
-                ", isExtension=" + packet.isExtension() + " ===");
+
 
         context.enqueueWork(() -> {
             if (context.player() != null && context.player().level() != null) {
                 BlockEntity entity = context.player().level().getBlockEntity(packet.pos());
-                System.out.println("  Found entity: " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
+
 
                 if (packet.isExtension() && entity instanceof WashplantExtensionBlockEntity extEntity) {
                     extEntity.setWashing(packet.isWashing());
-                    System.out.println("  -> Extension washing set to: " + extEntity.isWashing());
+
                 } else if (!packet.isExtension() && entity instanceof WashplantBaseBlockEntity baseEntity) {
                     baseEntity.setWashing(packet.isWashing());
-                    System.out.println("  -> Base washing set to: " + baseEntity.isWashing());
+
                 } else {
-                    System.out.println("  -> MISMATCH or NULL!");
+
                 }
             }
         });

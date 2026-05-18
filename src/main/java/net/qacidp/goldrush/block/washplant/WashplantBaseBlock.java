@@ -99,6 +99,12 @@ public class WashplantBaseBlock extends BaseEntityBlock {
                     return ItemInteractionResult.FAIL;
                 }
 
+                // Kein Matten-Slot wenn Head direkt drüber
+                if (level.getBlockState(pos.above()).getBlock() instanceof WashplantHeadBlock) {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cNo mat slot here!"));
+                    return ItemInteractionResult.FAIL;
+                }
+
                 baseEntity.setHasMat(true);
                 baseEntity.setMatWashCycles(matItem.getWashCycles());
                 baseEntity.setMatMaterialPoints(WashplantMatItem.getMaterialPoints(stack)); // Punkte laden
@@ -126,7 +132,7 @@ public class WashplantBaseBlock extends BaseEntityBlock {
                 // Gib das richtige Item basierend auf Waschgängen zurück
                 ItemStack matItem = getMatItemForWashCycles(baseEntity.getMatWashCycles());
                 WashplantMatItem.setMaterialPoints(matItem, baseEntity.getMatMaterialPoints()); // Punkte speichern
-
+                WashplantMatItem.setGoldGrams(matItem, baseEntity.getMatGoldGrams()); // NEU
 
                 if (!player.getInventory().add(matItem)) {
                     player.drop(matItem, false);

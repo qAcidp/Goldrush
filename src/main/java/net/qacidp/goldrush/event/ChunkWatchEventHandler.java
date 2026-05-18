@@ -12,8 +12,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantHeadBlockEntity;
+import net.qacidp.goldrush.block.entity.WavetableBlockEntity;
 import net.qacidp.goldrush.network.SyncWashplantFillPacket;
 import net.qacidp.goldrush.network.SyncWashplantMatPacket;
+import net.qacidp.goldrush.network.SyncWavetablePacket;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
 
@@ -42,7 +44,14 @@ public class ChunkWatchEventHandler {
                         new SyncWashplantMatPacket(extEntity.getBlockPos(), true,
                                 extEntity.getMatWashCycles(),
                                 extEntity.getMatMaterialPoints(), true));
-            }
+
+            } else if (be instanceof WavetableBlockEntity wavetable && wavetable.isProcessing()) {
+            PacketDistributor.sendToPlayer(event.getPlayer(),
+                    new SyncWavetablePacket(wavetable.getBlockPos(),
+                            wavetable.isProcessing(),
+                            wavetable.getProcessingTicks()));
+        }
+
         }
     }
 }

@@ -60,6 +60,7 @@ public class PaydirtShovelItem extends ShovelItem {
                             GoldDistributionComponent component = context.getItemInHand()
                                     .get(ModDataComponents.GOLD_DISTRIBUTION.get());
                             bucketEntity.addGold(component.getGoldDistribution()[0]);
+                            System.out.println("[BUCKET] Gold im Eimer: " + bucketEntity.getTotalGold() + "g (+" + component.getGoldDistribution()[0] + "g)");
 
                             Block nextBlock = getNextBucketBlock(bucketEntity.getFillLevel());
                             level.setBlock(pos, nextBlock.defaultBlockState(), 3);
@@ -164,6 +165,7 @@ public class PaydirtShovelItem extends ShovelItem {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof PaydirtBlockEntity paydirtEntity) {
                 float goldForLayer = paydirtEntity.removeTopLayer();
+                System.out.println("[SHOVEL] Gold aufgenommen: " + goldForLayer + "g");
                 int remainingLayers = paydirtEntity.getCurrentLayers();
 
                 float[] singleLayer = new float[]{goldForLayer};

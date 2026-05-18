@@ -4,7 +4,7 @@
 	"texture_size": [64, 64],
   "textures": {
     "1": "goldrush:block/washplant/washplant_head",
-    "particle": "goldrush:block//washplant/washplant_head"
+    "particle": "goldrush:block/washplant/washplant_head"
   },
 	"elements": [
 		{

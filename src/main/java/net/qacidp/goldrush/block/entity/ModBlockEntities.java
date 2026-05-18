@@ -9,6 +9,7 @@ import net.qacidp.goldrush.block.entity.BucketBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantHeadBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantBaseBlockEntity;
 import net.qacidp.goldrush.block.entity.WashplantExtensionBlockEntity;
+import net.qacidp.goldrush.block.entity.WavetableBlockEntity;
 
 import java.util.function.Supplier;
 
@@ -67,4 +68,13 @@ public class ModBlockEntities {
                             ModBlocks.PAYDIRT_BUCKET_BLOCK_75.get(),
                             ModBlocks.PAYDIRT_BUCKET_BLOCK_100.get()
                     ).build(null));
+
+
+    public static final Supplier<BlockEntityType<WavetableBlockEntity>>
+            WAVETABLE_BLOCK_ENTITY = BLOCK_ENTITIES.register(
+            "wavetable_block_entity",
+            () -> BlockEntityType.Builder.of(WavetableBlockEntity::new,
+                    ModBlocks.WAVETABLE_LEFT.get(),
+                    ModBlocks.WAVETABLE_RIGHT.get()).build(null));
+
 }

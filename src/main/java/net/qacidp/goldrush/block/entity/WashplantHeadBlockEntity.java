@@ -26,6 +26,8 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private int washingTicks = 0;
     private static final int TOTAL_WASHING_TICKS = 200;
     private float totalMaterialWashed = 0f;
+    // Statt totalGoldInHead — eine Queue pro Eimer
+    private java.util.ArrayDeque<Float> goldQueue = new java.util.ArrayDeque<>();
 
     public WashplantHeadBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WASHPLANT_HEAD_BLOCK_ENTITY.get(), pos, state);
@@ -158,74 +160,81 @@ public class WashplantHeadBlockEntity extends BlockEntity {
     private static void addMaterialPointsToMats(Level level, BlockPos headPos, int points) {
         if (level.isClientSide || points <= 0) return;
 
-        System.out.println("=== ADDING " + points + " POINTS TO MATS ===");
-
         ServerLevel serverLevel = (ServerLevel) level;
         BlockPos below = headPos.below();
 
-        int matsFound = 0;
+        WashplantHeadBlockEntity headEntity = (WashplantHeadBlockEntity) level.getBlockEntity(headPos);
+        float totalGold = 0f;
+        if (headEntity != null && !headEntity.goldQueue.isEmpty()) {
+            totalGold = headEntity.goldQueue.poll(); // erstes Element nehmen und entfernen
+            headEntity.setChanged();
+        }
 
+        // Sammle alle Matten
+        java.util.List<Object> mats = new java.util.ArrayList<>();
         for (int i = 0; i < 3; i++) {
             BlockPos basePos = below.north(i);
             BlockEntity entity = level.getBlockEntity(basePos);
-
-            System.out.println("Checking base " + i + " at " + basePos + ": " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
-
-            if (entity instanceof WashplantBaseBlockEntity baseEntity) {
-                System.out.println("  hasMat: " + baseEntity.hasMat());
-
-                if (baseEntity.hasMat()) {
-                    matsFound++;
-                    int oldPoints = baseEntity.getMatMaterialPoints();
-                    int oldCycles = baseEntity.getMatWashCycles();
-
-                    baseEntity.addMatMaterialPoints(points);
-                    int newPoints = baseEntity.getMatMaterialPoints();
-
-                    int newCycles = Math.min(6, newPoints / 100);
-                    baseEntity.setMatWashCycles(newCycles);
-
-                    System.out.println("  -> Base mat: " + oldPoints + " + " + points + " = " + newPoints + " points");
-                    System.out.println("  -> Cycles: " + oldCycles + " -> " + newCycles);
-
-                    PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
-                            new net.minecraft.world.level.ChunkPos(basePos),
-                            new SyncWashplantMatPacket(basePos, true, newCycles, newPoints, false));
-                }
+            if (entity instanceof WashplantBaseBlockEntity baseEntity && baseEntity.hasMat()) {
+                mats.add(baseEntity);
             }
         }
-
         for (int i = 3; i < 6; i++) {
             BlockPos extPos = below.north(i);
             BlockEntity entity = level.getBlockEntity(extPos);
-
-            System.out.println("Checking extension " + (i-3) + " at " + extPos + ": " + (entity != null ? entity.getClass().getSimpleName() : "NULL"));
-
-            if (entity instanceof WashplantExtensionBlockEntity extEntity) {
-                System.out.println("  hasMat: " + extEntity.hasMat());
-
-                if (extEntity.hasMat()) {
-                    matsFound++;
-                    int oldPoints = extEntity.getMatMaterialPoints();
-                    int oldCycles = extEntity.getMatWashCycles();
-
-                    extEntity.addMatMaterialPoints(points);
-                    int newPoints = extEntity.getMatMaterialPoints();
-
-                    int newCycles = Math.min(6, newPoints / 100);
-                    extEntity.setMatWashCycles(newCycles);
-
-                    System.out.println("  -> Extension mat: " + oldPoints + " + " + points + " = " + newPoints + " points");
-                    System.out.println("  -> Cycles: " + oldCycles + " -> " + newCycles);
-
-                    PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
-                            new net.minecraft.world.level.ChunkPos(extPos),
-                            new SyncWashplantMatPacket(extPos, true, newCycles, newPoints, true));
-                }
+            if (entity instanceof WashplantExtensionBlockEntity extEntity && extEntity.hasMat()) {
+                mats.add(extEntity);
             }
         }
 
-        System.out.println("Total mats found: " + matsFound);
+        int matCount = mats.size();
+        if (matCount == 0) return;
+
+        // Zufällige Gewichte ~20% ± 10% pro Matte
+        java.util.Random random = new java.util.Random();
+        float[] weights = new float[matCount];
+        float weightSum = 0f;
+        for (int i = 0; i < matCount; i++) {
+            weights[i] = 0.1f + random.nextFloat() * 0.2f; // 0.1 bis 0.3
+            weightSum += weights[i];
+        }
+
+        // Normalisieren damit Summe = 1.0
+        for (int i = 0; i < matCount; i++) {
+            weights[i] /= weightSum;
+        }
+
+        // Punkte und Gold verteilen
+        for (int i = 0; i < matCount; i++) {
+            float goldShare = totalGold * weights[i];
+            Object mat = mats.get(i);
+
+            if (mat instanceof WashplantBaseBlockEntity baseEntity) {
+                baseEntity.addMatMaterialPoints(points);
+                baseEntity.addMatGoldGrams(goldShare);
+                System.out.println("[MAT] Gold zu Matte " + i + ": +" + goldShare + "g (Anteil: " + String.format("%.1f", weights[i]*100) + "%)");
+                int newPoints = baseEntity.getMatMaterialPoints();
+                int newCycles = Math.min(6, newPoints / 100);
+                baseEntity.setMatWashCycles(newCycles);
+
+                PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
+                        new net.minecraft.world.level.ChunkPos(baseEntity.getBlockPos()),
+                        new SyncWashplantMatPacket(baseEntity.getBlockPos(), true, newCycles, newPoints, false));
+
+            } else if (mat instanceof WashplantExtensionBlockEntity extEntity) {
+                extEntity.addMatMaterialPoints(points);
+                extEntity.addMatGoldGrams(goldShare);
+                System.out.println("[MAT] Gold zu Matte " + i + ": +" + goldShare + "g (Anteil: " + String.format("%.1f", weights[i]*100) + "%)");
+                int newPoints = extEntity.getMatMaterialPoints();
+                int newCycles = Math.min(6, newPoints / 100);
+                extEntity.setMatWashCycles(newCycles);
+
+                PacketDistributor.sendToPlayersTrackingChunk(serverLevel,
+                        new net.minecraft.world.level.ChunkPos(extEntity.getBlockPos()),
+                        new SyncWashplantMatPacket(extEntity.getBlockPos(), true, newCycles, newPoints, true));
+            }
+        }
+
     }
 
     private static void spawnWaterParticles(ServerLevel level, BlockPos headPos) {
@@ -311,6 +320,12 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         tag.putFloat("startFillLevel", startFillLevel);
         tag.putInt("washingTicks", washingTicks);
         tag.putFloat("totalMaterialWashed", totalMaterialWashed);
+        net.minecraft.nbt.ListTag goldList = new net.minecraft.nbt.ListTag();
+        for (float g : goldQueue) {
+            goldList.add(net.minecraft.nbt.FloatTag.valueOf(g));
+        }
+        tag.put("goldQueue", goldList);
+
     }
 
     @Override
@@ -322,6 +337,11 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         startFillLevel = tag.getFloat("startFillLevel");
         washingTicks = tag.getInt("washingTicks");
         totalMaterialWashed = tag.getFloat("totalMaterialWashed");
+        goldQueue.clear();
+        net.minecraft.nbt.ListTag goldList = tag.getList("goldQueue", net.minecraft.nbt.Tag.TAG_FLOAT);
+        for (int i = 0; i < goldList.size(); i++) {
+            goldQueue.add(goldList.getFloat(i));
+        }
     }
 
 
@@ -331,6 +351,15 @@ public class WashplantHeadBlockEntity extends BlockEntity {
         tag.putFloat("fillLevel", fillLevel);
         tag.putBoolean("isWashing", isWashing);
         return tag;
+    }
+
+    public float getTotalGoldInHead() {
+        return goldQueue.stream().reduce(0f, Float::sum);
+    }
+
+    public void addGoldToHead(float gold) {
+        goldQueue.add(gold);
+        setChanged();
     }
 
 }

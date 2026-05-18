@@ -50,5 +50,23 @@ public class WashplantMatItem extends Item {
         } else {
             tooltipComponents.add(Component.literal("§6Heavily used - " + washCycles + " washes (" + points + " pts)"));
         }
+
+        float grams = getGoldGrams(stack);
+        if (grams > 0) {
+            tooltipComponents.add(Component.literal("§6Gold: " + String.format("%.4f", grams) + "g"));
+        }
+    }
+
+    public static void setGoldGrams(ItemStack stack, float grams) {
+        CustomData existing = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CompoundTag tag = existing.copyTag();
+        tag.putFloat("goldGrams", grams);
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+    }
+
+    public static float getGoldGrams(ItemStack stack) {
+        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag()
+                .getFloat("goldGrams");
     }
 }

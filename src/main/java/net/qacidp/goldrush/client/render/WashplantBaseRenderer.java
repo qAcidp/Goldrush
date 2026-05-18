@@ -68,11 +68,11 @@ public class WashplantBaseRenderer implements BlockEntityRenderer<WashplantBaseB
         Matrix4f matrix = poseStack.last().pose();
 
 
-        float matY = 15f / 16f;
+        float matY = 9f / 16f;
         float x1 = 3f / 16f;
         float x2 = 13f / 16f;
-        float z1 = 0.0f;
-        float z2 = 1.0f;
+        float z1 = 1f / 16f;  // 1 Pixel Abstand vorne
+        float z2 = 15f / 16f; // 1 Pixel Abstand hinten
 
         vertexConsumer.addVertex(matrix, x1, matY, z2)
                 .setColor(255, 255, 255, 255)

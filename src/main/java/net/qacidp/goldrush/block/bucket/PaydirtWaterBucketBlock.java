@@ -93,6 +93,17 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
 
                 bucketEntity.addGoldPoints(pointsToAdd);
 
+                float matGoldGrams = WashplantMatItem.getGoldGrams(stack);
+// Anteilig falls nur Teil der Punkte übernommen wird
+                float goldShare = matPoints > 0 ? matGoldGrams * ((float) pointsToAdd / matPoints) : 0f;
+                System.out.println("[BUCKET_BEFORE] goldGrams vorher: " + bucketEntity.getGoldGrams() +
+                        ", goldShare hinzufügen: " + goldShare);
+                bucketEntity.addGoldGrams(goldShare);
+                System.out.println("[BUCKET_AFTER] goldGrams nachher: " + bucketEntity.getGoldGrams());
+
+// Restliche goldGrams auf die zurückgegebene Matte
+                float remainingGold = matGoldGrams - goldShare;
+
                 // Matte zurückgeben
                 if (!player.isCreative()) {
                     stack.shrink(1);
@@ -105,6 +116,7 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
                         // Matte hat noch Punkte — gleiche Stufe aber reduzierte Punkte
                         returnMat = getMatItemForPoints(pointsLeftOnMat);
                         WashplantMatItem.setMaterialPoints(returnMat, pointsLeftOnMat);
+                        WashplantMatItem.setGoldGrams(returnMat, remainingGold);
                     }
 
                     if (!player.getInventory().add(returnMat)) {
@@ -124,10 +136,12 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
 
                 if (newBlock != state.getBlock()) {
                     int savedPoints = bucketEntity.getGoldPoints();
+                    float savedGrams = bucketEntity.getGoldGrams(); // NEU
                     level.setBlock(pos, newBlock.defaultBlockState(), 3);
                     BlockEntity newEntity = level.getBlockEntity(pos);
                     if (newEntity instanceof PaydirtWaterBucketBlockEntity newBucketEntity) {
                         newBucketEntity.addGoldPoints(savedPoints);
+                        newBucketEntity.addGoldGrams(savedGrams); // NEU
                     }
                 }
 
@@ -148,6 +162,8 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
                     .copyTag()
                     .getInt("goldPoints");
 
+
+
             Block newBlock;
             if (points >= 600) {
                 newBlock = ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_FULL.get();
@@ -161,9 +177,15 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
                 level.setBlock(pos, newBlock.defaultBlockState(), 3);
             }
 
+            float grams = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                    .copyTag()
+                    .getFloat("goldGrams");
+
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof PaydirtWaterBucketBlockEntity bucketEntity) {
                 bucketEntity.addGoldPoints(points);
+                bucketEntity.addGoldGrams(grams);
+
             }
         }
     }
@@ -181,8 +203,10 @@ public class PaydirtWaterBucketBlock extends BaseEntityBlock {
             } else {
                 drop = new ItemStack(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK.get());
             }
-            CustomData.update(DataComponents.CUSTOM_DATA, drop,
-                    tag -> tag.putInt("goldPoints", bucketEntity.getGoldPoints()));
+            CustomData.update(DataComponents.CUSTOM_DATA, drop, tag -> {
+                tag.putInt("goldPoints", bucketEntity.getGoldPoints());
+                tag.putFloat("goldGrams", bucketEntity.getGoldGrams());
+            });
             popResource(level, pos, drop);
         }
         super.playerDestroy(level, player, pos, state, blockEntity, tool);

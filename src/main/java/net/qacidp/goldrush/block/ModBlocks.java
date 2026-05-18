@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 
 import static net.qacidp.goldrush.Goldrush.MODID;
 import net.qacidp.goldrush.item.bucket.PaydirtWaterBucketBlockItem;
+import net.qacidp.goldrush.block.wavetable.WavetableBlock;
+import net.qacidp.goldrush.block.wavetable.WavetableRightBlock;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -127,6 +129,18 @@ public class ModBlocks {
             () -> new WashplantHeadBlock(BlockBehaviour.Properties.of()
                     .strength(2.0f)
                     .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    // Wavetable
+
+    public static final DeferredBlock<Block> WAVETABLE_LEFT = registerBlock("wavetable_left",
+            () -> new WavetableBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f).sound(SoundType.METAL).noOcclusion()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<Block> WAVETABLE_RIGHT = registerBlock("wavetable_right",
+            () -> new WavetableRightBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f).sound(SoundType.METAL).noOcclusion()
                     .noOcclusion()));
 
 

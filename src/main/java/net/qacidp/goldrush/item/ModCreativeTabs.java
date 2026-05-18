@@ -66,6 +66,7 @@ public class ModCreativeTabs {
                         output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK);
                         output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_HALF);
                         output.accept(ModBlocks.PAYDIRT_WATER_BUCKET_BLOCK_FULL);
+                        output.accept(ModBlocks.WAVETABLE_LEFT);
 
 
 

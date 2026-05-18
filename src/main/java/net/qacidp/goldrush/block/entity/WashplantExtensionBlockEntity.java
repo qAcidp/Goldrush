@@ -87,6 +87,7 @@ public class WashplantExtensionBlockEntity extends BlockEntity {
         tag.putBoolean("hasMat", hasMat);
         tag.putInt("matWashCycles", matWashCycles);
         tag.putInt("matMaterialPoints", matMaterialPoints); // NEU
+        tag.putFloat("matGoldGrams", matGoldGrams);
     }
 
     @Override
@@ -96,12 +97,28 @@ public class WashplantExtensionBlockEntity extends BlockEntity {
         hasMat = tag.getBoolean("hasMat");
         matWashCycles = tag.getInt("matWashCycles");
         matMaterialPoints = tag.getInt("matMaterialPoints"); // NEU
+        matGoldGrams = tag.getFloat("matGoldGrams");
     }
 
     public void removeMat() {
         this.hasMat = false;
         this.matWashCycles = 0;
         this.matMaterialPoints = 0; // RESET
+        this.matGoldGrams = 0f;
+        setChanged();
+    }
+
+    private float matGoldGrams = 0f;
+
+    public float getMatGoldGrams() { return matGoldGrams; }
+
+    public void setMatGoldGrams(float grams) {
+        this.matGoldGrams = grams;
+        setChanged();
+    }
+
+    public void addMatGoldGrams(float grams) {
+        this.matGoldGrams += grams;
         setChanged();
     }
 

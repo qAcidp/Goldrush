@@ -8,6 +8,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import static net.qacidp.goldrush.Goldrush.MODID;
 import net.qacidp.goldrush.network.SyncWashplantFillPacket;
 import net.qacidp.goldrush.network.SyncWashplantBasePacket;
+import net.qacidp.goldrush.network.SyncWavetablePacket;
 
 @EventBusSubscriber(modid = MODID)
 public class ModPackets {
@@ -39,5 +40,12 @@ public class ModPackets {
                 SyncWashplantMatPacket.STREAM_CODEC,
                 SyncWashplantMatPacket::handle
         );
+
+        registrar.playToClient(
+                SyncWavetablePacket.TYPE,
+                SyncWavetablePacket.STREAM_CODEC,
+                SyncWavetablePacket::handle
+        );
+
     }
 }

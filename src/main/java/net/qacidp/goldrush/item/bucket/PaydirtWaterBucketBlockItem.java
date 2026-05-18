@@ -24,6 +24,14 @@ public class PaydirtWaterBucketBlockItem extends BlockItem {
                 .copyTag()
                 .getInt("goldPoints");
         tooltipComponents.add(Component.literal("§7Gold Points: " + points + "/1200"));
+
+        float grams = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag()
+                .getFloat("goldGrams");
+        tooltipComponents.add(Component.literal("§7Gold Points: " + points + "/1200"));
+        if (grams > 0) {
+            tooltipComponents.add(Component.literal("§6Gold: " + String.format("%.4f", grams) + "g"));
+        }
     }
 
     @Override

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "goldrush:block/wavetable/wavetable_left" },
+    "facing=south": { "model": "goldrush:block/wavetable/wavetable_left", "y": 180 },
+    "facing=east":  { "model": "goldrush:block/wavetable/wavetable_left", "y": 90 },
+    "facing=west":  { "model": "goldrush:block/wavetable/wavetable_left", "y": 270 }
+  }
+}

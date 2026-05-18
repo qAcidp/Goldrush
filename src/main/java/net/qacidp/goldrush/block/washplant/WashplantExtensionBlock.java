@@ -105,20 +105,43 @@ public class WashplantExtensionBlock extends BaseEntityBlock {
 
             // Matte platzieren
             if (stack.getItem() instanceof WashplantMatItem matItem) {
-                if (extEntity.hasMat()) { // GEÄNDERT!
+                if (extEntity.hasMat()) {
                     player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cAlready has a mat!"));
                     return ItemInteractionResult.FAIL;
                 }
 
-                extEntity.setHasMat(true); // GEÄNDERT!
-                extEntity.setMatWashCycles(matItem.getWashCycles()); // GEÄNDERT!
-                extEntity.setMatMaterialPoints(WashplantMatItem.getMaterialPoints(stack)); // Punkte laden
+                // Kein Matten-Slot wenn kein weiterer Extension-Block daneben
+                // Extension 2 (letzter) hat auf keiner Seite einen weiteren Extension-Block
+                int extensionNeighborCount = 0;
+                if (level.getBlockState(pos.north()).getBlock() instanceof WashplantExtensionBlock) extensionNeighborCount++;
+                if (level.getBlockState(pos.south()).getBlock() instanceof WashplantExtensionBlock) extensionNeighborCount++;
+                if (level.getBlockState(pos.east()).getBlock() instanceof WashplantExtensionBlock) extensionNeighborCount++;
+                if (level.getBlockState(pos.west()).getBlock() instanceof WashplantExtensionBlock) extensionNeighborCount++;
+
+                boolean hasNeighborBase =
+                        level.getBlockState(pos.north()).getBlock() instanceof WashplantBaseBlock ||
+                                level.getBlockState(pos.south()).getBlock() instanceof WashplantBaseBlock ||
+                                level.getBlockState(pos.east()).getBlock() instanceof WashplantBaseBlock ||
+                                level.getBlockState(pos.west()).getBlock() instanceof WashplantBaseBlock;
+
+                boolean isLastExtension = extensionNeighborCount <= 1 && !hasNeighborBase;
+
+
+
+                if (isLastExtension) {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cNo mat slot here — outflow!"));
+                    return ItemInteractionResult.FAIL;
+                }
+
+                extEntity.setHasMat(true);
+                extEntity.setMatWashCycles(matItem.getWashCycles());
+                extEntity.setMatMaterialPoints(WashplantMatItem.getMaterialPoints(stack));
+                extEntity.setMatGoldGrams(WashplantMatItem.getGoldGrams(stack));
 
                 PacketDistributor.sendToPlayersTrackingChunk((net.minecraft.server.level.ServerLevel) level,
                         new net.minecraft.world.level.ChunkPos(pos),
                         new SyncWashplantMatPacket(pos, true, matItem.getWashCycles(),
-                                extEntity.getMatMaterialPoints(), true)); // getMatMaterialPoints() statt 0
-
+                                extEntity.getMatMaterialPoints(), true));
 
                 if (!player.isCreative()) {
                     stack.shrink(1);
@@ -126,6 +149,7 @@ public class WashplantExtensionBlock extends BaseEntityBlock {
 
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aMat placed!"));
                 return ItemInteractionResult.SUCCESS;
+
             }
 
             // Matte entfernen
@@ -137,6 +161,7 @@ public class WashplantExtensionBlock extends BaseEntityBlock {
 
                 ItemStack matItem = getMatItemForWashCycles(extEntity.getMatWashCycles()); // GEÄNDERT!
                 WashplantMatItem.setMaterialPoints(matItem, extEntity.getMatMaterialPoints()); // Punkte speichern
+                WashplantMatItem.setGoldGrams(matItem, extEntity.getMatGoldGrams()); // NEU
 
                 if (!player.getInventory().add(matItem)) {
                     player.drop(matItem, false);
